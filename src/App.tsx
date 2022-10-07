@@ -1,4 +1,3 @@
-import { Button } from './components/Button'
 import { ThemeProvider } from 'styled-components'
 import { defaultTheme } from './themes/defaultTheme'
 import { GlobalStyle } from './styles/global'
