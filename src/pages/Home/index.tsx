@@ -1,7 +1,9 @@
-import { Play } from 'phosphor-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as zod from 'zod'
+
+import { Play } from 'phosphor-react'
 
 import {
   CountdownContainer,
@@ -27,25 +29,59 @@ const newCycleFormValidationSchema = zod.object({
 // }
 type NewCicleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
+interface Cycle {
+  id: string
+  task: string
+  minutesAmout: number
+}
+
 export function Home() {
-  const { register, handleSubmit, watch, formState, reset } =
-    useForm<NewCicleFormData>({
-      resolver: zodResolver(newCycleFormValidationSchema),
-      defaultValues: {
-        task: '',
-        minutesAmount: 0,
-      },
-    })
+  const [cycles, setCycle] = useState<Cycle[]>([])
+  const [activeCicleId, setActiveCicleId] = useState<string | null>([])
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    // formState,
+    reset,
+  } = useForm<NewCicleFormData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
+  })
 
   function handleCreateNewCycle(data: NewCicleFormData) {
-    console.log(data)
+    const id = String(new Date().getTime())
+
+    const newCicle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmout: data.minutesAmount,
+    }
+
+    /**
+     * quando alteramos um estado e este depende da sua versão anterior, o react
+     * tem uma regrinha que deve ser seguida.
+     * O valor do estado deve ser setado no formato de função (Closures)
+     * Por isso usamos a arrowfunction como visualizado abaixo
+     */
+
+    setCycle((state) => [...state, newCicle])
+    setActiveCicleId(id)
+
     reset()
   }
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCicleId)
+  console.log(activeCycle)
 
   const task = watch('task')
   const isSubmitDisable = !task
 
-  console.log(formState.errors)
+  // console.log(formState.errors)
 
   return (
     <HomeContainer>
@@ -72,7 +108,7 @@ export function Home() {
             placeholder="00"
             step={5}
             min={5}
-            // max={60}
+            max={60}
             {...register('minutesAmount', { valueAsNumber: true })}
           />
 
